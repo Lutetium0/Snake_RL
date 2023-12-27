@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://d4m32s7xpxh4r"]
+
+[ext_resource type="Script" path="res://SnakeBody.gd" id="1_jynft"]
+[ext_resource type="Texture2D" uid="uid://or15udtem3m0" path="res://tile_0018.png" id="2_2folp"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ou5ob"]
+size = Vector2(16, 16)
+
+[node name="SnakeBody" type="Node2D"]
+script = ExtResource("1_jynft")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
+texture = ExtResource("2_2folp")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(-3.57628e-07, -3.57628e-07)
+scale = Vector2(0.8, 0.8)
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
+shape = SubResource("RectangleShape2D_ou5ob")
