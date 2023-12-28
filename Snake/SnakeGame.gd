@@ -42,7 +42,8 @@ func _process(delta):
 		get_init_info()
 		
 	if isGameBegin and isGameStart and !isGameEnd:
-		post_game_state()
+		post_game_state(false)
+		get_cur_action()
 		
 func is_http_usable(httpNode:HTTPRequest):
 	if httpNode.get_http_client_status() == HTTPClient.STATUS_DISCONNECTED:
@@ -69,11 +70,15 @@ func get_cur_action():
 		push_error("An error occurred in the HTTP request.")
 		reset_http(httpNodeAct)
 		
-func post_game_state():
-	if snake_body.size() < 3 or lastApple == null:
-		return
-	if !is_http_usable(httpNodeState):
-		return
+func post_game_state(isFinalDeadState:bool):
+	if isFinalDeadState:
+		isGameEnd = true
+		reset_http(httpNodeState)
+	else:
+		if snake_body.size() < 3 or lastApple == null:
+			return
+		if !is_http_usable(httpNodeState):
+			return
 		
 	var headPos = snake_body[0].global_position
 	var applePos = lastApple.global_position
@@ -95,7 +100,6 @@ func _http_request_completed_init(result, response_code, headers, body):
 		isGameEnd = false
 		start_game()
 	elif isGameBegin and !response["begin"]:
-		isGameEnd = true
 		isGameBegin = false
 	reset_http(httpNodeInit)
 
@@ -103,6 +107,18 @@ func _http_request_completed_act(result, response_code, headers, body):
 	var json = JSON.new()
 	json.parse(body.get_string_from_utf8())
 	var response = json.get_data()
+	
+	var curAction = lastAction
+	if response["curAction"] == 0 && lastAction != 1:
+		curAction = 0
+	elif response["curAction"] == 1 && lastAction != 0:
+		curAction = 1
+	elif response["curAction"] == 2 && lastAction != 3:
+		curAction = 2
+	elif response["curAction"] == 3 && lastAction != 2:
+		curAction = 3
+	lastAction = curAction
+	print(lastAction)
 	
 func _http_request_completed_state(result, response_code, headers, body):
 	var json = JSON.new()
@@ -223,4 +239,5 @@ func snake_dead():
 		isGameBegin = true
 		start_game()
 	else:
+		post_game_state(true)
 		reset_game()
